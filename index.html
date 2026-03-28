@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Билет и задержки</title>
+  </head>
+  <body>
+    <h1>Данные</h1>
+    <form id="data-form">
+      <p>
+        <label for="ticket_number">Номер билета</label>
+        <input
+          id="ticket_number"
+          name="ticket_number"
+          autocomplete="off"
+          required
+        />
+      </p>
+      <p>
+        <label for="delay_amount">Сумма задержек</label>
+        <input
+          id="delay_amount"
+          name="delay_amount"
+          type="number"
+          inputmode="decimal"
+          step="any"
+          min="0"
+          required
+        />
+      </p>
+      <p>
+        <button type="submit" name="action" value="supabase">Записать в Supabase</button>
+        <button type="submit" name="action" value="vercel">Отправить на API</button>
+        <button type="submit" name="action" value="both">Сначала API, затем Supabase</button>
+      </p>
+    </form>
+    <output id="log" aria-live="polite"></output>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
