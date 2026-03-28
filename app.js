@@ -6,7 +6,6 @@ const CONFIG = {
   supabaseUrl: "https://unwodgqmmtvtgvtvqfts.supabase.co",
   supabaseAnonKey: "sb_publishable_ThQtD3xhueLZfA5wpdejKQ_FMvCl5kR",
   tableName: "demo_events",
-  vercelApiUrl: "/api/submit",
 };
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm";
@@ -48,7 +47,7 @@ function readPayload(formEl) {
 
 const supabase = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
 
-async function insertViaSupabase(payload) {
+async function insertRow(payload) {
   const row = {
     ticket_number: payload.ticket_number,
     delay_amount: payload.delay_amount,
@@ -58,57 +57,13 @@ async function insertViaSupabase(payload) {
   return data;
 }
 
-async function postToVercelApi(payload) {
-  const url =
-    CONFIG.vercelApiUrl.startsWith("http") || CONFIG.vercelApiUrl.startsWith("//")
-      ? CONFIG.vercelApiUrl
-      : new URL(CONFIG.vercelApiUrl, window.location.origin).href;
-
-  const body = {
-    ticket_number: payload.ticket_number,
-    delay_amount: payload.delay_amount,
-  };
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  const text = await res.text();
-  let parsed;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    parsed = text;
-  }
-
-  if (!res.ok) {
-    const err = new Error(`Vercel API ${res.status}`);
-    err.detail = parsed;
-    throw err;
-  }
-  return parsed;
-}
-
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const action = e.submitter?.getAttribute("value") || "vercel";
   setBusy(true);
   try {
     const payload = readPayload(form);
-    if (action === "supabase") {
-      const data = await insertViaSupabase(payload);
-      log("Supabase OK", data);
-    } else if (action === "vercel") {
-      const data = await postToVercelApi(payload);
-      log("API OK", data);
-    } else if (action === "both") {
-      const api = await postToVercelApi(payload);
-      log("Шаг 1: API", api);
-      const row = await insertViaSupabase(payload);
-      log("Шаг 2: Supabase", row);
-    }
+    const data = await insertRow(payload);
+    log("Записано в Supabase", data);
   } catch (err) {
     log("Ошибка", { message: err.message, detail: err.detail ?? err });
   } finally {
